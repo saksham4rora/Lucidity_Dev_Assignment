@@ -19,25 +19,34 @@ class ShortestPathStrategy implements RouteStrategy {
     private double computeTravelTime(Location from, Location to) {
         return (from.calculateDistanceTo(to) / Constants.AVERAGE_SPEED_KMH) * 60;
     }
-
-    //The number of orders is small (only 2 in our example), hence an optimal Greedy Strategy has been used for simplicity as mentioned in the assignment. 
-    //We could have used Djikstra in case we had multiple nodes/traffic conditions
+    /**
+    * The number of orders is small (only 2 in our example), hence an optimal Greedy Strategy has been used for simplicity as mentioned in the assignment. 
+    * We could have used Djikstra in case we had multiple nodes/traffic conditions
+    */
     @Override
     public double calculateRouteTime(Location driver, List<Order> orders) {
-        orders.sort(Comparator.comparingDouble(order ->
-            order.getRestaurantLocation().calculateDistanceTo(driver) +
-            computeTravelTime(order.getRestaurantLocation(), order.getConsumerLocation()) +
-            order.getPreparationTime()));
-
         double totalTime = 0.0;
         Location currentLocation = driver;
+        List<Order> remainingOrders = new ArrayList<>(orders);
+        
+        while (!remainingOrders.isEmpty()) {
+            final Location finalCurrentLocation = currentLocation; 
 
-        for (Order order : orders) {
-            double travelTime = computeTravelTime(currentLocation, order.getRestaurantLocation());
-            double prepTime = order.getPreparationTime();
-            double deliveryTime = computeTravelTime(order.getRestaurantLocation(), order.getConsumerLocation());
+            Order nextOrder = remainingOrders.stream()
+                .min(Comparator.comparingDouble(order -> {
+                    double travelToRestaurant = computeTravelTime(finalCurrentLocation, order.getRestaurantLocation());
+                    double deliveryTime = computeTravelTime(order.getRestaurantLocation(), order.getConsumerLocation());
+                    return Math.max(travelToRestaurant, order.getPreparationTime()) + deliveryTime;
+                }))
+                .orElseThrow();
+            
+            double travelTime = computeTravelTime(currentLocation, nextOrder.getRestaurantLocation());
+            double prepTime = nextOrder.getPreparationTime();
+            double deliveryTime = computeTravelTime(nextOrder.getRestaurantLocation(), nextOrder.getConsumerLocation());
+            
             totalTime += Math.max(travelTime, prepTime) + deliveryTime;
-            currentLocation = order.getConsumerLocation();
+            currentLocation = nextOrder.getConsumerLocation();
+            remainingOrders.remove(nextOrder);
         }
         return totalTime;
     }

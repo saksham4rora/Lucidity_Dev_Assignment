@@ -19,27 +19,17 @@ public class BestRouteMain {
 
         Location aman = new Location(12.9352, 77.6245); // Aman’s position (Koramangala, Bangalore)
 
-       // Example 1: Delivery based on distance
-       List<Order> orders1 = Arrays.asList(
+        List<Order> orders = Arrays.asList(
             new Order(new Location(12.9081, 77.6510), new Location(12.8995, 77.6601), 10),
-            new Order(new Location(12.9802, 77.6500), new Location(12.9705, 77.6402), 30)
+            new Order(new Location(12.9802, 77.6500), new Location(12.9705, 77.6402), 15),
+            new Order(new Location(12.9201, 77.6420), new Location(12.9155, 77.6502), 12)
         );
-        
-        // Example 2: Delivery based on prep time
-        List<Order> orders2 = Arrays.asList(
-            new Order(new Location(12.9081, 77.6510), new Location(12.8995, 77.6601), 30),
-            new Order(new Location(12.9802, 77.6500), new Location(12.9705, 77.6402), 10)
-        );
+
         // optimizer.setStrategy(null);
         optimizer.setStrategy(new ShortestPathStrategy());
         
-        double optimalTime1 = optimizer.optimizeRoute(aman, orders1);
-        logger.info(String.format("Optimal Delivery Time for Example 1: %d minutes %d seconds", 
-        (int) optimalTime1, (int) ((optimalTime1 - (int) optimalTime1) * 60)));
-        
-        double optimalTime2 = optimizer.optimizeRoute(aman, orders2);
-        logger.info(String.format("Optimal Delivery Time for Example 2: %d minutes %d seconds", 
-        (int) optimalTime2, (int) ((optimalTime2 - (int) optimalTime2) * 60)));
+        double optimalTime = optimizer.optimizeRoute(aman, orders);
+        logger.info(String.format("Optimal Delivery Time: %d minutes %d seconds", (int) optimalTime, (int) ((optimalTime - (int) optimalTime) * 60)));
     
     }
 }
